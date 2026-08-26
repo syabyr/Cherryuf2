@@ -43,6 +43,7 @@ It only supports DFU with MSC.
 |STM32F411 |                                                                             | [STM32F4xx_Hal](https://github.com/STMicroelectronics/stm32f4xx_hal_driver.git) <br> [STM32F4xx_CMSIS](https://github.com/STMicroelectronics/cmsis_device_f4.git) 
 |STM32G431 |                                                                             | [STM32G4xx_Hal](https://github.com/STMicroelectronics/stm32g4xx_hal_driver.git) <br> [STM32G4xx_CMSIS](https://github.com/STMicroelectronics/cmsis_device_g4.git) 
 |STM32L433 |                                                                             | [STM32L4xx_Hal](https://github.com/STMicroelectronics/stm32l4xx_hal_driver.git) <br> [STM32L4xx_CMSIS](https://github.com/STMicroelectronics/cmsis_device_l4.git) 
+|STM32L4R5 | NUCLEO-L4R5ZI, requires factory default DBANK=1 (dual-bank flash).          | [STM32L4xx_Hal](https://github.com/STMicroelectronics/stm32l4xx_hal_driver.git) <br> [STM32L4xx_CMSIS](https://github.com/STMicroelectronics/cmsis_device_l4.git) 
 
 
 ---

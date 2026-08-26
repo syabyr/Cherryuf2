@@ -62,9 +62,21 @@ static bool flash_erase(uint32_t addr) {
     if (!erased && !is_blank(sector_addr, size)) {
         FLASH_EraseInitTypeDef EraseInitStruct = {0};
         EraseInitStruct.TypeErase              = FLASH_TYPEERASE_PAGES;
-        EraseInitStruct.Banks                  = FLASH_BANK_1;
-        EraseInitStruct.Page                   = sector;
-        EraseInitStruct.NbPages                = 1;
+#if defined(FLASH_BANK_2)
+        // dual-bank devices (e.g. STM32L4R5): page index is relative to the bank
+        uint32_t bank_base = FLASH_BASE_ADDR + BOARD_FLASH_SIZE / 2;
+        if (sector_addr >= bank_base) {
+            EraseInitStruct.Banks = FLASH_BANK_2;
+            EraseInitStruct.Page  = (sector_addr - bank_base) / BOARD_SECTOR_SIZE;
+        } else {
+            EraseInitStruct.Banks = FLASH_BANK_1;
+            EraseInitStruct.Page  = (sector_addr - FLASH_BASE_ADDR) / BOARD_SECTOR_SIZE;
+        }
+#else
+        EraseInitStruct.Banks = FLASH_BANK_1;
+        EraseInitStruct.Page  = sector;
+#endif
+        EraseInitStruct.NbPages = 1;
 
         uint32_t SectorError = 0;
         HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
@@ -101,7 +113,7 @@ __attribute__((weak)) void board_flash_init(void) {
 }
 
 __attribute__((weak)) int board_flash_write(uint32_t addr, void const *data, size_t len) {
-    if (addr < CONFIG_BOOTUF2_APP_START_ADDR && addr > CONFIG_BOOTUF2_APP_END_ADDR) {
+    if (addr < CONFIG_BOOTUF2_APP_START_ADDR || addr > CONFIG_BOOTUF2_APP_END_ADDR) {
         return -1;
     }
 

@@ -22,9 +22,10 @@ CFLAGS += -Wno-error=cast-align -Wno-error=unused-parameter
 # default linker file
 LD_FILES ?= $(PORT_DIR)/ld/STM32L433XC_FLASH.ld
 
-# Port source
+# Port source (use PORT_DIR instead of CURRENT_PATH: macOS realpath does not
+# support --relative-to, which leaves CURRENT_PATH empty)
 SRC_C += \
-	$(addprefix $(CURRENT_PATH)/, $(wildcard *.c)) \
+	$(addprefix $(PORT_DIR)/, $(wildcard *.c)) \
 	$(ST_CMSIS)/Source/Templates/system_stm32l4xx.c \
 	$(ST_DRIVERS)/Src/stm32l4xx_hal.c \
 	$(ST_DRIVERS)/Src/stm32l4xx_hal_cortex.c \
@@ -42,8 +43,17 @@ INC += \
 	$(TOP)/$(ST_CMSIS)/Include \
 	$(TOP)/$(ST_DRIVERS)/Inc
 
-# Port source for USB
+# Port source for USB (fsdev by default, dwc2 for STM32L4+ OTG_FS devices,
+# selected by board.mk via USB_IP before this file is included)
+ifeq ($(USB_IP),dwc2)
+SRC_C += \
+	$(CHERRYUSB_DIR)/port/dwc2/usb_dc_dwc2.c \
+	$(CHERRYUSB_DIR)/port/dwc2/usb_glue_st.c
+
+INC += $(TOP)/$(CHERRYUSB_DIR)/port/dwc2
+else
 SRC_C += $(CHERRYUSB_DIR)/port/fsdev/usb_dc_fsdev.c
 
 # Port include for USB port
 INC += $(TOP)/$(CHERRYUSB_DIR)/port/fsdev
+endif
