@@ -2,6 +2,7 @@
 .build
 keil
 .vscode
+.DS_Store
 *.sh
 *.py
 *.svd
