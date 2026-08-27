@@ -30,6 +30,10 @@
 static struct usbd_interface intf0;
 
 __attribute__((weak)) void board_uf2boot_init(void) {
+    // dwc2 driver relies on HAL_Delay (via usbd_dwc2_delay_ms) during init,
+    // start SysTick so the HAL timebase ticks
+    SysTick_Config(SystemCoreClock / 1000U);
+
     usbd_desc_register(BOOTUF2_BUS_ID_FS, &bootuf2_descriptor);
     usbd_add_interface(BOOTUF2_BUS_ID_FS, usbd_msc_init_intf(BOOTUF2_BUS_ID_FS, &intf0, BOOTUF2_OUT_EP, BOOTUF2_IN_EP));
     usbd_initialize(BOOTUF2_BUS_ID_FS, USB_DEVICE_SPEED_FS, USB_OTG_FS_PERIPH_BASE, usbd_event_handler);
@@ -69,13 +73,17 @@ void OTG_FS_IRQHandler(void) {
 
 //--------------------------------------------------------------------+
 // dwc2 fifo configuration
+// Total must not exceed the OTG_FS DFIFO depth of 320 words (1.25KB),
+// otherwise the dwc2 driver stalls forever on its overflow check.
+// RX = (5 * control eps + 8) + (512 / 4 + 1) + (2 * out eps) + 1 = 145,
+// TX0 = EP0 IN 64 bytes, TX1 = MSC IN 512 bytes -> 160 + 16 + 128 = 304
 //--------------------------------------------------------------------+
 static const uint16_t usbd_dwc2_rxfifo_size[1] = {
-    256, // OTGFS
+    160, // OTGFS
 };
 
 static const uint16_t usbd_dwc2_txfifo_size[1][4] = {
-    {24, 20, 20, 20}, // OTGFS
+    {64 / 4, 512 / 4, 0, 0}, // OTGFS
 };
 
 uint16_t usbd_get_dwc2_rxfifo_conf(uint8_t busid) {

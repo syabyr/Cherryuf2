@@ -133,6 +133,7 @@ void board_timer_stop(void) {
 }
 
 void SysTick_Handler(void) {
+    HAL_IncTick();
     board_timer_handler();
 }
 

@@ -22,9 +22,10 @@ CFLAGS += -Wno-error=cast-align -Wno-error=unused-parameter
 # default linker file
 LD_FILES ?= $(PORT_DIR)/ld/STM32F401XC_FLASH.ld
 
-# Port source
+# Port source (use PORT_DIR instead of CURRENT_PATH: macOS realpath does not
+# support --relative-to, which leaves CURRENT_PATH empty)
 SRC_C += \
-	$(addprefix $(CURRENT_PATH)/, $(wildcard *.c)) \
+	$(addprefix $(PORT_DIR)/, $(wildcard *.c)) \
 	$(ST_CMSIS)/Source/Templates/system_stm32f4xx.c \
 	$(ST_DRIVERS)/Src/stm32f4xx_hal.c \
 	$(ST_DRIVERS)/Src/stm32f4xx_hal_cortex.c \
